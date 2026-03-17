@@ -1,0 +1,346 @@
+.grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding: 16px;
+  max-width: 1400px;
+  margin: 0 auto;
+  justify-content: center;
+  align-content: flex-start;
+}
+
+.tile {
+  width: calc(25% - 12px);
+  min-width: 280px;
+  max-width: 400px;
+  flex: 1 1 calc(25% - 12px);
+  background: #fff;
+  border-radius: 12px;
+  padding: 20px;
+  margin-top: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+@media (max-width: 1200px) {
+  .tile {
+    flex: 1 1 calc(33.333% - 12px);
+  }
+}
+
+@media (max-width: 900px) {
+  .tile {
+    flex: 1 1 calc(50% - 12px);
+  }
+}
+
+@media (max-width: 600px) {
+  .tile {
+    flex: 1 1 100%;
+  }
+}
+
+.tile:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.tile-score {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #ff6600;
+  margin-bottom: 8px;
+}
+
+.tile.joke .tile-score {
+  color: #6b4eff;
+}
+
+.card-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.card-header .source-icon {
+  color: #888;
+  text-decoration: none;
+  font-size: 1rem;
+  display: inline-flex;
+  align-items: center;
+}
+
+.card-header .source-icon:hover {
+  color: #ff6600;
+}
+
+.tile-title a {
+  color: #333;
+  text-decoration: none;
+}
+
+.tile-title .source-icon {
+  float: right;
+  font-size: 0.9rem;
+  color: #888;
+  text-decoration: none;
+}
+
+.tile-title .source-icon:hover {
+  color: #ff6600;
+}
+
+.tile-title a:hover {
+  color: #ff6600;
+}
+
+.tile-meta {
+  font-size: 0.85rem;
+  color: #666;
+  margin-bottom: 12px;
+}
+
+.tile-desc {
+  font-size: 0.9rem;
+  color: #555;
+  line-height: 1.6;
+}
+
+.tile-comments {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #eee;
+  font-size: 0.85rem;
+  color: #888;
+}
+
+.tile.programming .card-header {
+  background: #f8f7ff;
+}
+
+.tile.programming .card-title {
+  color: #6b4eff;
+}
+
+.tile.top-stories .card-header {
+  background: #fff7ed;
+}
+
+.tile.top-stories .card-title {
+  color: #ff6600;
+}
+
+.tile.tim-harford .card-header {
+  background: #eefaf6;
+}
+
+.tile.tim-harford .card-title {
+  color: #2a9d8f;
+}
+
+.tile.podcast .card-header {
+  background: #fdeeee;
+}
+
+.tile.podcast .card-title {
+  color: #e63946;
+}
+
+.tile.podcast .external-icon {
+  color: #e63946;
+}
+
+.play-btn {
+  background: none !important;
+  border: none !important;
+  outline: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  box-shadow: none !important;
+  transition: all 0.2s ease;
+}
+
+.tile.podcast .play-btn {
+  color: #e63946;
+}
+
+.tile.podcast .play-btn:hover {
+  color: #e63946;
+  filter: drop-shadow(0 0 3px rgba(230, 57, 70, 0.5));
+}
+
+.tile.podcast .play-btn:hover {
+  color: #ff6600;
+}
+
+.tile.podcast .story-list a:hover .external-icon {
+  color: #ff6600;
+}
+
+.tile.ny-times .card-header {
+  background: #f5f5f5;
+}
+
+.tile.ny-times .card-title {
+  color: #000;
+}
+
+.tile.ny-times .external-icon {
+  color: #000;
+}
+
+.tile.ny-times .story-list a:hover .external-icon {
+  color: #ff6600;
+}
+
+.story-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  text-align: left;
+}
+
+.story-list li {
+  padding: 8px 0;
+  border-bottom: 1px solid #eee;
+  font-size: 0.85rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.story-list li:last-child {
+  border-bottom: none;
+}
+
+.story-list a {
+  color: #333;
+  text-decoration: none;
+  flex: 1;
+}
+
+.story-list a:hover {
+  color: #ff6600;
+}
+
+.external-icon {
+  margin-left: 4px;
+  font-size: 0.9em;
+}
+
+.tile.tim-harford .external-icon {
+  color: #2a9d8f;
+}
+
+.tile.tim-harford .play-btn {
+  color: #2a9d8f;
+}
+
+.tile.tim-harford .play-btn:hover {
+  color: #2a9d8f;
+  filter: drop-shadow(0 0 3px rgba(42, 157, 143, 0.5));
+}
+
+.tile.tim-harford .story-list a:hover .external-icon {
+  color: #ff6600;
+}
+
+.story-score {
+  color: #ff6600;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.joke-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  text-align: left;
+}
+
+.joke-list li {
+  padding: 8px 0;
+  border-bottom: 1px solid #eee;
+  font-size: 0.8rem;
+  color: #555;
+  line-height: 1.5;
+}
+
+.joke-list li:last-child {
+  border-bottom: none;
+}
+
+.loading {
+  text-align: center;
+  padding: 40px;
+  color: #666;
+}
+
+.filter-buttons {
+  display: flex;
+  gap: 8px;
+  padding: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.filter-btn {
+  padding: 8px 16px;
+  border: none;
+  background: #f0f0f0;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+}
+
+.filter-btn:hover,
+.filter-btn.active {
+  background: #ff6600;
+  color: white;
+}
+
+.tile.hidden {
+  display: none;
+}
+
+.tile {
+  animation: fadeIn 0.3s ease;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+}
+
+.card-header {
+  padding: 12px 16px;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.card-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.card-body {
+  padding: 12px 16px;
+  flex: 1;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

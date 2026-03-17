@@ -4,77 +4,330 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Hello, Deno</title>
-  <link rel="preload" href="https://demo-styles.deno.deno.net/fonts/Moranga-Regular.woff2" as="font" type="font/woff2" crossorigin />
-  <link rel="preload" href="https://demo-styles.deno.deno.net/fonts/Moranga-Medium.woff2" as="font" type="font/woff2" crossorigin />
-  <link rel="preload" href="https://demo-styles.deno.deno.net/fonts/Recursive_Variable.woff2" as="font" type="font/woff2" crossorigin />
+  <title>Isotope Feed</title>
+  <link rel="preload" href="https://demo-styles.deno.deno.net/fonts/Moranga-Regular.woff2" as="font" type="font/woff2"
+    crossorigin />
+  <link rel="preload" href="https://demo-styles.deno.deno.net/fonts/Moranga-Medium.woff2" as="font" type="font/woff2"
+    crossorigin />
+  <link rel="preload" href="https://demo-styles.deno.deno.net/fonts/Recursive_Variable.woff2" as="font"
+    type="font/woff2" crossorigin />
   <link rel="stylesheet" href="https://demo-styles.deno.deno.net/styles.css">
-  <style>
-    img {
-      display: inline-block;
-      vertical-align: middle;
-    }
-  </style>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="style.css">
+  <script>
+    const src = new EventSource('/live-reload');
+    src.addEventListener('message', (e) => {
+      if (e.data === 'reload') {
+        src.close();
+        location.reload();
+      }
+    });
+  </script>
 </head>
 
 <body>
-    <main>
-      <section>
-        <a href="https://deno.com/deploy">
-        </a>
-      <h1>
-        <p>
-          Hello, Deno!
-        </p>
-      </h1>
-      <p>
-        This little example is being served by <a href="https://deno.com/">Deno</a>.
-        You can run it locally or in porduction on <a href="https://deno.com/deploy">Deno Deploy</a> or other hosting platforms.
-      </p>
-      <ul>
-        <li>Run it locally with<code>deno task dev</code></li>
-        <li>Deploy it to <a href="https://deno.com/deploy">Deno Deploy</a> via the CLI by running<code>deno deploy</code></li>
-        <li>Run it locally and share it publically by running <code>deno deploy --connected</code></li>
-      </ul>
-    </section>
-      <hr>
-    <section>
-      <h2>What's next?</h2>
-      <p>
-        You can clone this example and deploy it to Deno Deploy in just a few clicks
-        <a href="https://app.deno.com/new?clone=https://github.com/denoland/examples&path=hello-world"><img src="https://deno.com/button" alt="Deploy on Deno"/></a>
-      </p>
-      <ul>
-        <li>
-          <a href="https://docs.deno.com/examples">More examples in the Deno Docs</a>
-        </li>
-        <li>
-          <a href="https://deno.com/deploy">Deno Deploy Early Access</a>
-        </li>
-      </ul>
-    </section>
-    </main>
-    <hr>
-    <footer>
-      <section>
-      <ul class="flex-btwn">
-        <li>
-          <a href="https://deno.com">BlueSky</a>
-        </li>
-        <li>
-          <a href="https://deno.com">Twitter</a>
-        </li>
-        <li>
-          <a href="https://deno.com">YouTube</a>
-        </li>
-        <li>
-          <a href="https://deno.com">Newsletter</a>
-        </li>
-        <li>
-          <a href="https://deno.com">Deno</a>
-        </li>
-      </ul>
-      </section>
-    </footer>
+  <audio id="audio-player" controls
+    style="position: fixed; top: 0; left: 50%; transform: translateX(-50%); width: 50%; z-index: 1000;"></audio>
+  <main>
+    <div class="filter-buttons" style="margin-top: 60px;">
+      <button type="button" class="filter-btn active" data-filter="*">All</button>
+      <button type="button" class="filter-btn" data-filter="programming">Programming</button>
+      <button type="button" class="filter-btn" data-filter="podcast">Podcast</button>
+      <button type="button" class="filter-btn" data-filter="knowledge">Knowledge</button>
+      <button type="button" class="filter-btn" data-filter="news">News</button>
+    </div>
+
+    <div id="grid" class="grid">
+      <div class="loading">Loading feed...</div>
+    </div>
+  </main>
+
+  <script>
+    const grid = document.querySelector('#grid');
+
+    async function fetchJokes() {
+      const response = await fetch('https://v2.jokeapi.dev/joke/Programming?safe-mode&amount=15');
+      const data = await response.json();
+
+      if (data.jokes) {
+        return data.jokes.map(joke => ({
+          type: 'joke',
+          id: joke.id,
+          category: joke.category,
+          score: Math.floor(Math.random() * 80) + 20,
+          text: joke.joke || joke.setup + ' ' + joke.delivery
+        }));
+      }
+      return [];
+    }
+
+    async function fetchTimHarford() {
+      try {
+        const response = await fetch('https://api.rss2json.com/v1/api.json?rss_url=' + encodeURIComponent('https://podcasts.files.bbci.co.uk/p02pc9tn.rss'));
+        if (!response.ok) throw new Error('Failed to fetch');
+        const data = await response.json();
+        if (data.status === 'ok' && data.items) {
+          return data.items.slice(0, 7).map(item => ({
+            title: item.title || '',
+            link: item.link || '',
+            audio: item.enclosure?.link || item.audio || ''
+          }));
+        }
+        return [];
+      } catch (e) {
+        console.error('Tim Harford fetch error:', e);
+        return [];
+      }
+    }
+
+    async function fetchPodcast() {
+      try {
+        const response = await fetch('https://api.rss2json.com/v1/api.json?rss_url=' + encodeURIComponent('https://feeds.simplecast.com/BqbsxVfO'));
+        if (!response.ok) throw new Error('Failed to fetch');
+        const data = await response.json();
+        if (data.status === 'ok' && data.items) {
+          return data.items.slice(0, 7).map(item => ({
+            title: item.title || '',
+            link: item.link || '',
+            audio: item.enclosure?.link || item.audio || ''
+          }));
+        }
+        return [];
+      } catch (e) {
+        console.error('Podcast fetch error:', e);
+        return [{ title: 'Failed to load podcast feed', link: '#' }];
+      }
+    }
+
+    async function fetchNYTimes() {
+      try {
+        const response = await fetch('https://api.rss2json.com/v1/api.json?rss_url=' + encodeURIComponent('https://rss.nytimes.com/services/xml/rss/nyt/World.xml'));
+        if (!response.ok) throw new Error('Failed to fetch');
+        const data = await response.json();
+        if (data.status === 'ok' && data.items) {
+          return data.items.slice(0, 7).map(item => ({
+            title: item.title || '',
+            link: item.link || ''
+          }));
+        }
+        return [];
+      } catch (e) {
+        console.error('NY Times fetch error:', e);
+        return [];
+      }
+    }
+
+    async function fetchStories() {
+      const storyIds = await fetch('https://hacker-news.firebaseio.com/v0/topstories.json')
+        .then(r => r.json());
+
+      const stories = await Promise.all(
+        storyIds.slice(0, 12).map(id =>
+          fetch(`https://hacker-news.firebaseio.com/v0/item/${id}.json`)
+            .then(r => r.json())
+        )
+      );
+
+      return stories
+        .filter(s => s && s.title)
+        .map(story => ({
+          type: 'news',
+          id: story.id,
+          title: story.title,
+          url: story.url,
+          score: story.score || 0,
+          by: story.by,
+          time: story.time,
+          descendants: story.descendants,
+          text: story.text || ''
+        }));
+    }
+
+    async function init() {
+      const [stories, jokes, timHarford, podcast, nyTimes] = await Promise.all([fetchStories(), fetchJokes(), fetchTimHarford(), fetchPodcast(), fetchNYTimes()]);
+
+      const topStories = [...stories].sort((a, b) => (b.score || 0) - (a.score || 0)).slice(0, 7);
+
+      const programmingJokes = jokes.slice(0, 7);
+
+      const items = [];
+
+      // Use crypto random for sorting after both promises resolve
+      const rand = crypto.getRandomValues(new Uint32Array(items.length));
+      items.forEach((item, i) => item.rand = rand[i]);
+      items.sort((a, b) => a.rand - b.rand);
+
+      renderTiles(items, programmingJokes, topStories, timHarford, podcast, nyTimes);
+    }
+
+    function renderTiles(items, programmingJokes = [], topStories = [], timHarford = [], podcast = [], nyTimes = []) {
+      grid.innerHTML = '';
+
+      // Add the programming tile first
+      if (programmingJokes.length > 0) {
+        const progTile = document.createElement('div');
+        progTile.className = 'tile card programming';
+        progTile.dataset.filter = 'programming';
+        progTile.innerHTML = `
+          <div class="card-header">
+            <span class="card-title">Programming Jokes</span>
+            <a href="https://v2.jokeapi.dev/joke/Programming?safe-mode" target="_blank" class="source-icon" title="Data Source"><i class="bi bi-box-arrow-up-right"></i></a>
+          </div>
+          <div class="card-body">
+            <ul class="joke-list">
+              ${programmingJokes.map(j => `<li>${j.text}</li>`).join('')}
+            </ul>
+          </div>
+        `;
+        grid.appendChild(progTile);
+      }
+
+      // Add the top stories tile
+      if (topStories.length > 0) {
+        const storiesTile = document.createElement('div');
+        storiesTile.className = 'tile card top-stories';
+        storiesTile.dataset.filter = 'programming news';
+        storiesTile.innerHTML = `
+          <div class="card-header">
+            <span class="card-title">Hacker News</span>
+            <a href="https://news.ycombinator.com/" target="_blank" class="source-icon" title="Data Source"><i class="bi bi-box-arrow-up-right"></i></a>
+          </div>
+          <div class="card-body">
+            <ul class="story-list">
+              ${topStories.map(s => `
+                <li>
+                  <a href="${s.url || `https://news.ycombinator.com/item?id=${s.id}`}" target="_blank">
+                    ${s.title}
+                    <span class="external-icon">↗</span>
+                  </a>
+                  <span class="story-score">${s.score}</span>
+                </li>
+              `).join('')}
+            </ul>
+          </div>
+        `;
+        grid.appendChild(storiesTile);
+      }
+
+      // Add the Tim Harford tile
+      if (timHarford.length > 0) {
+        const harfordTile = document.createElement('div');
+        harfordTile.className = 'tile card tim-harford';
+        harfordTile.dataset.filter = 'podcast knowledge';
+        harfordTile.innerHTML = `
+          <div class="card-header">
+            <span class="card-title">Cautionary Tales (Tim Harford)</span>
+            <a href="https://podcasts.files.bbci.co.uk/p02pc9tn.rss" target="_blank" class="source-icon" title="Data Source"><i class="bi bi-box-arrow-up-right"></i></a>
+          </div>
+          <div class="card-body">
+            <ul class="story-list">
+              ${timHarford.map((s, i) => `
+                <li>
+                  <a href="${s.link}" target="_blank">
+                    ${s.title}
+                    <span class="external-icon">↗</span>
+                  </a>
+                  ${s.audio ? `<button class="play-btn" data-audio="${s.audio}" data-index="${i}"><i class="bi bi-play-circle-fill"></i></button>` : ''}
+                </li>
+              `).join('')}
+            </ul>
+          </div>
+        `;
+        grid.appendChild(harfordTile);
+      }
+
+      // Add the Podcast tile
+      if (podcast.length > 0) {
+        const podcastTile = document.createElement('div');
+        podcastTile.className = 'tile card podcast';
+        podcastTile.dataset.filter = 'podcast';
+        podcastTile.innerHTML = `
+          <div class="card-header">
+            <span class="card-title">99% Invisible</span>
+            <a href="https://feeds.simplecast.com/BqbsxVfO" target="_blank" class="source-icon" title="Data Source"><i class="bi bi-box-arrow-up-right"></i></a>
+          </div>
+          <div class="card-body">
+            <ul class="story-list">
+              ${podcast.map((s, i) => `
+                <li>
+                  <a href="${s.link}" target="_blank">
+                    ${s.title}
+                    <span class="external-icon">↗</span>
+                  </a>
+                  ${s.audio ? `<button class="play-btn podcast-play" data-audio="${s.audio}" data-index="${i}"><i class="bi bi-play-circle-fill"></i></button>` : ''}
+                </li>
+              `).join('')}
+          </ul>
+        `;
+        grid.appendChild(podcastTile);
+      }
+
+      // Add the NY Times tile
+      if (nyTimes.length > 0) {
+        const nyTile = document.createElement('div');
+        nyTile.className = 'tile card ny-times';
+        nyTile.dataset.filter = 'news';
+        nyTile.innerHTML = `
+          <div class="card-header">
+            <span class="card-title">NY Times World</span>
+            <a href="https://rss.nytimes.com/services/xml/rss/nyt/World.xml" target="_blank" class="source-icon" title="Data Source"><i class="bi bi-box-arrow-up-right"></i></a>
+          </div>
+          <div class="card-body">
+            <ul class="story-list">
+              ${nyTimes.map(s => `
+                <li>
+                  <a href="${s.link}" target="_blank">
+                    ${s.title}
+                    <span class="external-icon">↗</span>
+                  </a>
+                </li>
+              `).join('')}
+            </ul>
+          </div>
+        `;
+        grid.appendChild(nyTile);
+      }
+    }
+
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        const filter = btn.dataset.filter;
+        document.querySelectorAll('.tile').forEach(tile => {
+          const matchesFilter = filter === '*' || tile.dataset.filter.includes(filter);
+          tile.classList.toggle('hidden', !matchesFilter);
+        });
+      });
+    });
+
+    const audioPlayer = document.getElementById('audio-player');
+
+    document.addEventListener('click', (e) => {
+      const playBtn = e.target.closest('.play-btn');
+      if (playBtn) {
+        e.preventDefault();
+        e.stopPropagation();
+        const audioSrc = playBtn.dataset.audio;
+        if (audioPlayer.src === audioSrc && !audioPlayer.paused) {
+          audioPlayer.pause();
+          playBtn.innerHTML = '<i class="bi bi-play-circle-fill"></i>';
+        } else {
+          audioPlayer.src = audioSrc;
+          audioPlayer.play();
+          document.querySelectorAll('.play-btn').forEach(btn => btn.innerHTML = '<i class="bi bi-play-circle-fill"></i>');
+          playBtn.innerHTML = '<i class="bi bi-pause-circle-fill"></i>';
+        }
+      }
+    });
+
+    audioPlayer.addEventListener('pause', () => {
+      document.querySelectorAll('.play-btn').forEach(btn => btn.innerHTML = '<i class="bi bi-play-circle-fill"></i>');
+    });
+
+    init();
+  </script>
 </body>
+
 </html>
