@@ -4,44 +4,38 @@ body {
 }
 
 .grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 16px;
+  column-count: 4;
+  column-gap: 16px;
   padding: 16px;
   max-width: 1400px;
   margin: 0 auto;
-  justify-content: center;
-  align-content: flex-start;
 }
 
 .tile {
-  width: calc(25% - 12px);
-  min-width: 280px;
-  max-width: 400px;
-  flex: 1 1 calc(25% - 12px);
+  break-inside: avoid;
+  margin-bottom: 16px;
   background: #111;
   border-radius: 12px;
   padding: 20px;
-  margin-top: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 @media (max-width: 1200px) {
-  .tile {
-    flex: 1 1 calc(33.333% - 12px);
+  .grid {
+    column-count: 3;
   }
 }
 
 @media (max-width: 900px) {
-  .tile {
-    flex: 1 1 calc(50% - 12px);
+  .grid {
+    column-count: 2;
   }
 }
 
 @media (max-width: 600px) {
-  .tile {
-    flex: 1 1 100%;
+  .grid {
+    column-count: 1;
   }
 }
 
@@ -65,6 +59,7 @@ body {
   font-size: 1.1rem;
   font-weight: 600;
   line-height: 1.4;
+  color: #fff;
 }
 
 .card-header .source-icon {
@@ -150,12 +145,12 @@ body {
 }
 
 .tile.podcast .play-btn {
-  color: #e63946;
+  color: #fff;
 }
 
 .tile.podcast .play-btn:hover {
-  color: #e63946;
-  filter: drop-shadow(0 0 3px rgba(230, 57, 70, 0.5));
+  color: #fff;
+  filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.5));
 }
 
 .tile.podcast .play-btn:hover {
@@ -172,6 +167,23 @@ body {
 
 .tile.ny-times .external-icon {
   color: #fff;
+}
+
+.tile.tim-harford .external-icon {
+  color: #fff;
+}
+
+.tile.tim-harford .play-btn {
+  color: #fff;
+}
+
+.tile.tim-harford .play-btn:hover {
+  color: #fff;
+  filter: drop-shadow(0 0 3px rgba(255, 255, 255, 0.5));
+}
+
+.tile.tim-harford .story-list a:hover .external-icon {
+  color: #ff6600;
 }
 
 .story-list {
@@ -208,23 +220,6 @@ body {
 .external-icon {
   margin-left: 4px;
   font-size: 0.9em;
-}
-
-.tile.tim-harford .external-icon {
-  color: #fff;
-}
-
-.tile.tim-harford .play-btn {
-  color: #2a9d8f;
-}
-
-.tile.tim-harford .play-btn:hover {
-  color: #2a9d8f;
-  filter: drop-shadow(0 0 3px rgba(42, 157, 143, 0.5));
-}
-
-.tile.tim-harford .story-list a:hover .external-icon {
-  color: #ff6600;
 }
 
 .story-score {
@@ -274,24 +269,12 @@ body {
   animation: fadeIn 0.3s ease;
 }
 
-.card {
-  display: flex;
-  flex-direction: column;
-}
-
 .card-header {
   padding: 12px 16px;
   border-bottom: 1px solid #333;
   display: flex;
   justify-content: space-between;
   align-items: center;
-}
-
-.card-title {
-  font-size: 1.1rem;
-  font-weight: 600;
-  line-height: 1.4;
-  color: #fff;
 }
 
 .card-badges {
@@ -302,7 +285,6 @@ body {
 
 .card-body {
   padding: 12px 16px;
-  flex: 1;
 }
 
 @keyframes fadeIn {

@@ -1,45 +1,64 @@
-export default {
-  fetch(request: Request) {
-    const url = new URL(request.url);
+import { getFeed } from "./api/feed.ts";
 
-    if (url.pathname === "/live-reload") {
-      return new Response(new ReadableStream({
-        start(controller) {
-          const watcher = Deno.watchFs(["index.html", "style.css"]);
-          const encoder = new TextEncoder();
-          
-          (async () => {
-            try {
-              for await (const event of watcher) {
-                if (event.kind === "modify") {
-                  controller.enqueue(encoder.encode(`data: reload\n\n`));
-                }
-              }
-            } catch {
-              // Watcher stopped, ignore
-            }
-          })();
+const decoder = new TextDecoder();
 
-          request.signal.addEventListener("abort", () => {
-            watcher.close();
-            controller.close();
-          });
-        },
-      }), {
-        headers: { "Content-Type": "text/event-stream", "Cache-Control": "no-cache" },
-      });
-    }
+Deno.serve(async (req: Request) => {
+  const url = new URL(req.url);
+  const pathname = url.pathname;
 
-    if (url.pathname === "/style.css") {
-      const cssContent = Deno.readTextFileSync("./style.css");
-      return new Response(cssContent, {
-        headers: { "Content-Type": "text/css" },
-      });
-    }
-
-    const htmlContent = Deno.readTextFileSync("./index.html");
-    return new Response(htmlContent, {
-      headers: { "Content-Type": "text/html" },
+  if (pathname === "/api/feed") {
+    const feed = await getFeed();
+    return new Response(JSON.stringify(feed), {
+      headers: {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+      },
     });
-  },
-};
+  }
+
+  if (pathname === "/live-reload") {
+    const encoder = new TextEncoder();
+    const body = new ReadableStream({
+      start(controller) {
+        const watcher = Deno.watchFs(["./static"]);
+        
+        (async () => {
+          try {
+            for await (const event of watcher) {
+              if (event.kind === "modify") {
+                controller.enqueue(encoder.encode(`data: reload\n\n`));
+              }
+            }
+          } catch {
+            // Watcher stopped
+          }
+        })();
+
+        req.signal.addEventListener("abort", () => {
+          watcher.close();
+          controller.close();
+        });
+      },
+    });
+    return new Response(body, {
+      headers: {
+        "Content-Type": "text/event-stream",
+        "Cache-Control": "no-cache",
+      },
+    });
+  }
+
+  const staticDir = Deno.cwd() + "/static";
+
+  if (pathname === "/" || pathname === "/index.html") {
+    const html = await Deno.readTextFile(staticDir + "/index.html");
+    return new Response(html, { headers: { "Content-Type": "text/html" } });
+  }
+
+  if (pathname === "/style.css") {
+    const css = await Deno.readTextFile(staticDir + "/style.css");
+    return new Response(css, { headers: { "Content-Type": "text/css" } });
+  }
+
+  return new Response("Not Found", { status: 404 });
+});

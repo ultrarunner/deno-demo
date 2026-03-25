@@ -1,9 +1,7 @@
 {
   "tasks": {
-    "dev": "deno serve --watch --port 8000 --allow-read main.ts"
+    "dev": "deno run --watch --allow-net --allow-read main.ts",
+    "start": "deno run --allow-net --allow-read main.ts"
   },
-  "imports": {
-    "@std/assert": "jsr:@std/assert@1",
-    "@std/http": "jsr:@std/http@1"
-  }
+  "imports": {}
 }
